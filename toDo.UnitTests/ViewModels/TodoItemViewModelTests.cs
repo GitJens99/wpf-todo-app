@@ -15,60 +15,72 @@ namespace toDo.UnitTests.ViewModels
     [TestClass]
     public class TodoItemViewModelTests
     {
+        private TodoItemViewModel CreateSut(FakeTodoService fakeTodoService = null)
+        {
+            if(fakeTodoService == null)
+            {
+                fakeTodoService = new FakeTodoService();
+            }
+            return new TodoItemViewModel(
+                new ToDoItem(), fakeTodoService, new ObservableCollection<TodoItemViewModel>());
+        }
+
         [TestMethod]
         public void SetName_TodoItemNameIsSetToTodoItemViewModelName()
         {
             // Arrange --> Set up the data
-            var todo = new ToDoItem();
-            todo.Name = "Name is set correctly";
-            var todoItemViewModel = new TodoItemViewModel(
-                todo,
-                new TodoItemService(),
-                new ObservableCollection<TodoItemViewModel>());
-
+            var todoItemViewModel = CreateSut();
             // Act --> Take an action
-            var actual = todo.Name;
+            todoItemViewModel.Name = "Todo Item Name is set to Todo Item ViewModel Name";
             // Assert the results
-            todo.Name.ShouldBe("Name is set correctly");
-            //Assert.AreEqual(expected, actual);
+            todoItemViewModel.TodoItem.Name.ShouldBe("Todo Item Name is set to Todo Item ViewModel Name");
         }
 
-
         [TestMethod]
-        public void TodoItemIsDoneViweModel_TodoItemIsDoneViewModelIsSetCorrectly()
+        public void SetIsDone_TodoItemIsDoneIsSetToTodoItemViewModelIsDone()
         {
             // Arrange --> Set up the data
-            var todo = new ToDoItem();
-            todo.IsDone = true;
-            var todoItemViewModel = new TodoItemViewModel(
-                todo,
-                new TodoItemService(),
-                new ObservableCollection<TodoItemViewModel>());
-
-            bool expected = true;
+            var todoItemViewModel = CreateSut();
             // Act --> Take an action
-            var actual = todo.IsDone;
+            todoItemViewModel.IsDone = true;
             // Assert the results
-            Assert.AreEqual(expected, actual);
+            todoItemViewModel.TodoItem.IsDone.ShouldBeTrue();
         }
 
         [TestMethod]
         public void TodoItemTimeStampViweModel_TodoItemTimeStampViewModelIsSetCorrectly()
         {
             // Arrange --> Set up the data
+            var todoItemViewModel = CreateSut();
             var currentTime = DateTime.Now;
-            var todo = new ToDoItem();
-            todo.TimeStamp = currentTime;
-            var todoItemViewModel = new TodoItemViewModel(
-                todo,
-                new TodoItemService(),
-                new ObservableCollection<TodoItemViewModel>());
-
-            DateTime expected = currentTime;
             // Act --> Take an action
-            var actual = todo.TimeStamp;
+            todoItemViewModel.TimeStamp = currentTime;
             // Assert the results
-            Assert.AreEqual(expected, actual);
+            todoItemViewModel.TodoItem.TimeStamp.ShouldBe(currentTime);
+        }
+
+        [TestMethod]
+        public void SetIsDone_IsDoneIsTrue_WriteTodoIsExecuted()
+        {
+            // Arrange
+            var fakeTodoService = new FakeTodoService();
+            var todoItemViewModel = CreateSut(fakeTodoService);
+            // Act
+            todoItemViewModel.IsDone = true;
+            // Assert
+            fakeTodoService.SerializeAllItemsIsCalled.ShouldBeTrue();
+        }
+
+        [TestMethod]
+        public void SetIsDone_IsDoneIsFalse_WriteTodoIsExecuted()
+        {
+            // Arrange
+            var fakeTodoService = new FakeTodoService();
+            var todoItemViewModel = CreateSut(fakeTodoService);
+            // Act
+            todoItemViewModel.IsDone = false;
+            // Assert
+            fakeTodoService.SerializeAllItemsIsCalled.ShouldBeTrue();
         }
     }
 }

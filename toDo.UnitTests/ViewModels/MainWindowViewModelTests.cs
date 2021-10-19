@@ -21,9 +21,11 @@ namespace toDo.UnitTests.ViewModels
             return new ObservableCollection<ToDoItem>();
         }
 
+        public bool SerializeAllItemsIsCalled = false;
+
         public void SerializeAllItems(IEnumerable<ToDoItem> todoItems)
         {
-
+            SerializeAllItemsIsCalled = true;
         }
     }
 
