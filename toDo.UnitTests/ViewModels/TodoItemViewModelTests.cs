@@ -81,6 +81,7 @@ namespace toDo.UnitTests.ViewModels
             todoItemViewModel.IsDone = false;
             // Assert
             fakeTodoService.SerializeAllItemsIsCalled.ShouldBeTrue();
+            string testCommit = "VS Git GUI testen";
         }
     }
 }
