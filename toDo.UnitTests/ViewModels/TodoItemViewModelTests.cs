@@ -74,7 +74,8 @@ namespace toDo.UnitTests.ViewModels
         [TestMethod]
         public void SetIsDone_IsDoneIsFalse_WriteTodoIsExecuted()
         {
-            // Arrange
+            // Arrange 
+            string commitTest = "Code geaendert.";
             var fakeTodoService = new FakeTodoService();
             var todoItemViewModel = CreateSut(fakeTodoService);
             // Act
