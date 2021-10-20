@@ -65,7 +65,6 @@ namespace toDo.ViewModels
         public bool AddButtonCanUse()
         {
             return (!String.IsNullOrEmpty(NewTodoName));
-
         }
 
         public bool DeleteButtonCanUse()
