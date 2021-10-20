@@ -44,8 +44,7 @@ namespace toDo.ViewModels
         {
             _todoItemService = todoItemService;
             _dateTimeService = dateTimeService;
-            AddButtonCommand = new RelayCommand(NewAddTodoItem, AddButtonCanUse);
-            DeleteButtonCommand = new RelayCommand(NewDeleteTodoItem, DeleteButtonCanUse);
+           
             TodoItems = new ObservableCollection<TodoItemViewModel>();
             var todoItemModels = _todoItemService.ReadItemsFromJsonFile();
 
@@ -53,7 +52,9 @@ namespace toDo.ViewModels
             {
                 TodoItems.Add(CreateTodoViewModel(item));
             }
-                       
+
+            AddButtonCommand = new RelayCommand(NewAddTodoItem, AddButtonCanUse);
+            DeleteButtonCommand = new RelayCommand(NewDeleteTodoItem, DeleteButtonCanUse);
         }
 
         private TodoItemViewModel CreateTodoViewModel(ToDoItem todoItem)
