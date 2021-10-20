@@ -44,16 +44,16 @@ namespace toDo.ViewModels
         {
             _todoItemService = todoItemService;
             _dateTimeService = dateTimeService;
-
+            AddButtonCommand = new RelayCommand(NewAddTodoItem, AddButtonCanUse);
+            DeleteButtonCommand = new RelayCommand(NewDeleteTodoItem, DeleteButtonCanUse);
             TodoItems = new ObservableCollection<TodoItemViewModel>();
             var todoItemModels = _todoItemService.ReadItemsFromJsonFile();
+
             foreach(var item in todoItemModels)
             {
                 TodoItems.Add(CreateTodoViewModel(item));
             }
-
-            AddButtonCommand = new RelayCommand(NewAddTodoItem, AddButtonCanUse);
-            DeleteButtonCommand = new RelayCommand(NewDeleteTodoItem, DeleteButtonCanUse);
+                       
         }
 
         private TodoItemViewModel CreateTodoViewModel(ToDoItem todoItem)
@@ -63,14 +63,8 @@ namespace toDo.ViewModels
 
         public bool AddButtonCanUse()
         {
-            if (String.IsNullOrEmpty(NewTodoName))
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
+            return (!String.IsNullOrEmpty(NewTodoName));
+
         }
 
         public bool DeleteButtonCanUse()
@@ -111,15 +105,7 @@ namespace toDo.ViewModels
 
         private void OnAddObjectButtonClickedWithList(object sender, RoutedEventArgs e)
         {
-            /*
-            var lines = new List<string>();
-            foreach (var toDoItem in _toDoItems)
-            {
-                var line = $"{toDoItem.isDone};{toDoItem.Name};{toDoItem.erstellZeitpunkt}";
-                lines.Add(line);
-            }
-            File.WriteAllLines(csvPath, lines);
-            */
+            
 
             var newToDoItem = new ToDoItem()
             {
