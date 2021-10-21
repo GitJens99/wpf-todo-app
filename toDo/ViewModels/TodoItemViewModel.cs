@@ -8,7 +8,7 @@ using toDo.Services;
 
 namespace toDo.ViewModels
 {
-    public class TodoItemViewModel
+    public class TodoItemViewModel : ViewModelBase
     {
         private ITodoItemService _todoItemService;
         private IEnumerable<ToDoItem> _allTodos;

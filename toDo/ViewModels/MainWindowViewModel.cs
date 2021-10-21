@@ -14,8 +14,10 @@ using toDo.Services;
 
 namespace toDo.ViewModels
 {
-    public class MainWindowViewModel
+    public class MainWindowViewModel : ViewModelBase
     {
+        private const string NEW_TODO = "Neues Todo";
+        
         public ITodoItemService _todoItemService;
         public IDateTimeService _dateTimeService;
 
@@ -32,7 +34,12 @@ namespace toDo.ViewModels
         public string NewTodoName
         {
             get { return _newTodoName; }
-            set { _newTodoName = value; AddButtonCommand?.RaiseCanExecuteChanged(); }
+            set 
+            {
+                _newTodoName = value; 
+                AddButtonCommand?.RaiseCanExecuteChanged();
+                RaisePropertyChanged(nameof(NewTodoName));
+            }
         }
 
         public RelayCommand AddButtonCommand { get; set; }
@@ -55,6 +62,8 @@ namespace toDo.ViewModels
 
             AddButtonCommand = new RelayCommand(NewAddTodoItem, AddButtonCanUse);
             DeleteButtonCommand = new RelayCommand(NewDeleteTodoItem, DeleteButtonCanUse);
+
+            NewTodoName = NEW_TODO;
         }
 
         private TodoItemViewModel CreateTodoViewModel(ToDoItem todoItem)
@@ -64,19 +73,12 @@ namespace toDo.ViewModels
 
         public bool AddButtonCanUse()
         {
-            return (!String.IsNullOrEmpty(NewTodoName));
+            return (!String.IsNullOrEmpty(NewTodoName)) &! String.Equals(NewTodoName, NEW_TODO);
         }
 
         public bool DeleteButtonCanUse()
         {
-            if(SelectedTodoItem == null)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
+            return SelectedTodoItem != null;
         }
 
         private void NewAddTodoItem()
@@ -91,6 +93,8 @@ namespace toDo.ViewModels
                 TodoItems.Add(CreateTodoViewModel(newToDoItem));
 
                 _todoItemService.SerializeAllItems(TodoItems.Select(vm => vm.TodoItem));
+
+                NewTodoName = NEW_TODO;
             }
         }
 
