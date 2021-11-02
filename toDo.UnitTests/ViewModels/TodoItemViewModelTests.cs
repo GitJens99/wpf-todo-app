@@ -22,7 +22,7 @@ namespace toDo.UnitTests.ViewModels
                 fakeTodoService = new FakeTodoService();
             }
             return new TodoItemViewModel(
-                new ToDoItem(), fakeTodoService, new ObservableCollection<TodoItemViewModel>());
+                new ToDoItem(), fakeTodoService, new ObservableCollection<TodoItemViewModel>(), new MainWindowViewModel(fakeTodoService, new FakeDateTimeService()));
         }
 
         [TestMethod]
@@ -81,7 +81,6 @@ namespace toDo.UnitTests.ViewModels
             todoItemViewModel.IsDone = false;
             // Assert
             fakeTodoService.SerializeAllItemsIsCalled.ShouldBeTrue();
-            string testCommit = "VS Git GUI testen";
         }
     }
 }

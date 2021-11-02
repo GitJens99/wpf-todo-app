@@ -4,6 +4,15 @@
              xmlns:local="clr-namespace:toDo"
              StartupUri="Views/MainWindow.xaml">
     <Application.Resources>
-         
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Styles/Color.xaml"></ResourceDictionary>
+                <ResourceDictionary Source="/Resources/Converters.xaml"></ResourceDictionary>
+                <ResourceDictionary Source="/Styles/TextblockStyle.xaml"></ResourceDictionary>
+                <ResourceDictionary Source="/Styles/ButtonStyle.xaml"></ResourceDictionary>
+                <ResourceDictionary Source="/Styles/MaterialDesignButton.xaml"></ResourceDictionary>
+                <ResourceDictionary Source="/Styles/SampleCustomControlStyles.xaml"></ResourceDictionary>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

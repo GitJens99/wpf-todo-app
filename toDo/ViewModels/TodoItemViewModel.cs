@@ -10,9 +10,10 @@ namespace toDo.ViewModels
 {
     public class TodoItemViewModel : ViewModelBase
     {
-        private ITodoItemService _todoItemService;
-        private IEnumerable<ToDoItem> _allTodos;
-
+        private readonly ITodoItemService _todoItemService;
+        private readonly MainWindowViewModel _viewModel;
+        private readonly IEnumerable<ToDoItem> _allTodos;
+        
         public string Name 
         { 
             get { return TodoItem.Name; }
@@ -29,6 +30,12 @@ namespace toDo.ViewModels
             {
                 TodoItem.IsDone = value;
                 _todoItemService.SerializeAllItems(_allTodos);
+                /*_viewModel.TodoItems = new System.Collections.ObjectModel.ObservableCollection<TodoItemViewModel>
+                    (_todoItemService.ReadItemsFromJsonFile().
+                    OrderBy(todo => todo).
+                    Select(todo => new TodoItemViewModel(todo, _todoItemService, _viewModel.TodoItems, _viewModel)));*/
+                
+                _viewModel.UpdateCounter();
             }
         }
 
@@ -46,10 +53,12 @@ namespace toDo.ViewModels
         public TodoItemViewModel(
             ToDoItem todoItem,
             ITodoItemService todoItemService,
-            IEnumerable<TodoItemViewModel> allTodos)
+            IEnumerable<TodoItemViewModel> allTodos,
+            MainWindowViewModel viewModel)
         {
             TodoItem = todoItem;
             _todoItemService = todoItemService;
+            _viewModel = viewModel;
             _allTodos = allTodos.Select(vm => vm.TodoItem);
         }
     }

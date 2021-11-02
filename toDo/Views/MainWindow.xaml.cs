@@ -25,16 +25,13 @@ namespace toDo.Views
     /// </summary>
     public partial class MainWindow : Window
     {
-        
         public MainWindow()
         {
             InitializeComponent();
-
+            
             DataContext = new MainWindowViewModel(
                 new TodoItemService(),
                 new DateTimeService());
-            
         }
-
     }
 }

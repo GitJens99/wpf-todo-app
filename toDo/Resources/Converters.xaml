@@ -1,0 +1,7 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:converters="clr-namespace:toDo.Converters">
+
+    <converters:ToDoDatumfsformatConverter x:Key="ToDoDatumFormatConverter" />
+    <converters:ToUpperCaseConverter x:Key="ToUpperCaseConverter" />
+</ResourceDictionary>

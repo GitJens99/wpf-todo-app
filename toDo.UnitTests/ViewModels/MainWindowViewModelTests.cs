@@ -83,7 +83,7 @@ namespace toDo.UnitTests.ViewModels
         {
             // Arrange
             var viewModel = CreateSut();
-            viewModel.SelectedTodoItem = new TodoItemViewModel(new ToDoItem(), null, viewModel.TodoItems) ;
+            viewModel.SelectedTodoItem = new TodoItemViewModel(new ToDoItem(), null, viewModel.TodoItems, null) ;
             // Act
             var canExecute = viewModel.DeleteButtonCommand.CanExecute(null);
             // Assert
@@ -158,6 +158,58 @@ namespace toDo.UnitTests.ViewModels
             var todo = viewModel.TodoItems.Single();
             todo.TimeStamp.ShouldBe(currentTime);
         }
+
+        [TestMethod]
+        public void TodaysNotFinishedTodosCounter_NewTodoIsAddedToEmtpyList_CounterIsOne()
+        {
+            // Arrange
+            var viewModel = CreateSut(DateTime.Now);
+            viewModel.NewTodoName = "Counter sollte sich von 0 auf 1 erhöhen";
+            // Act
+            viewModel.AddButtonCommand.Execute(null);
+            // Assert
+            viewModel.TodaysNotFinishedTodosCounter.ShouldBe(1);
+        }
+
+        [TestMethod]
+        public void Counter_IsDoneChangedFromFalseToTrue_CounterDecrements()
+        {
+            // Arrange
+            var viewModel = CreateSut(DateTime.Now);
+            viewModel.NewTodoName = "Counter sollte sich von 1 auf 0 ändern";
+            // Act
+            viewModel.AddButtonCommand.Execute(null);
+            viewModel.TodoItems.First().IsDone = true;
+            // Assert
+            viewModel.TodaysNotFinishedTodosCounter.ShouldBe(0);
+        }
+
+        [TestMethod]
+        public void Counter_DeleteNotFinishedTodo_CounterDecrements()
+        {
+            // Arrange
+            var viewModel = CreateSut(DateTime.Now);
+            viewModel.NewTodoName = "Counter sollte sich von 1 auf 0 ändern";
+            // Act
+            viewModel.AddButtonCommand.Execute(null);
+            viewModel.SelectedTodoItem = viewModel.TodoItems.First();
+            viewModel.DeleteButtonCommand.Execute(null);
+            // Assert
+            viewModel.TodaysNotFinishedTodosCounter.ShouldBe(0);
+        }
+
+        [TestMethod]
+        public void Counter_TodoItemsEmpty_CounterShouldBeZero()
+        {
+            // Arrange
+            var viewModel = CreateSut(DateTime.Now);
+            // Act
+            // Do nothing --> just initiliaze viewModel
+            // Assert
+            viewModel.TodaysNotFinishedTodosCounter.ShouldBe(0);
+        }
+
+        // Testen, ob nicht erledigte Todos, die nicht heute erstellt worden sind
 
         private MainWindowViewModel CreateSut(DateTime fakeNow = default(DateTime))
         {

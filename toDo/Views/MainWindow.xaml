@@ -3,96 +3,82 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:converters="clr-namespace:toDo.Converters"
-        xmlns:local="clr-namespace:toDo"
+        xmlns:local="clr-namespace:toDo" 
+        xmlns:controls="clr-namespace:toDo.Controls" xmlns:viewmodels="clr-namespace:toDo.ViewModels" d:DataContext="{d:DesignInstance Type=viewmodels:MainWindowViewModel}"
         mc:Ignorable="d"
         Title="toDoFenster" Height="450" Width="800">
 
     <Window.Resources>
-        <converters:ToDoDatumfsformatConverter x:Key="ToDoDatumFormatConverter" />
 
-        <Style x:Key="UeberschriftTextBlockStyle"
-               TargetType="TextBlock">
-            <Setter Property="Foreground" Value="Black" />
-            <Setter Property="FontSize" Value="22"/>
-        </Style>
-        <Style x:Key="ButtonStyle"
-               TargetType="Button">
-            <Setter Property="Background" Value="LightGray"/>
-            <Setter Property="FontSize" Value="22"/>
-            <Setter Property="Width" Value="180"/>
-            <Setter Property="Margin" Value="10"/>
-            <Setter Property="BorderBrush" Value="Black"></Setter>
-            <Setter Property="BorderThickness" Value="2"></Setter>
-        </Style>
     </Window.Resources>
-    
-    
-    <Grid Margin="5, 5, 5, 5">
-      
-        <!--
-        <Grid.ColumnDefinitions> 
-            <ColumnDefinition Width="1*" />
-            <ColumnDefinition Width="1*" />
-        </Grid.ColumnDefinitions>
-        -->
-        <Grid.RowDefinitions> <!-- 2 Zeilen -->
-            <RowDefinition Height="1*" />
-            <RowDefinition Height="1*" />
+
+    <Grid Margin="10,10,10,10"
+          Background="#E0E0E0">
+
+        <Grid.RowDefinitions>
+            <!-- 4 Zeilen -->
+            <RowDefinition Height="90"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="20"/>
         </Grid.RowDefinitions>
+        <StackPanel>
 
-        <StackPanel Grid.Row="0">
-            <TextBlock Text="Neue ToDo eingeben" 
-                       Style="{StaticResource UeberschriftTextBlockStyle}"/>
-            <TextBox x:Name="EingabeTextBox" 
-                     Text="{Binding NewTodoName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                     Background="LightGray"
-                     HorizontalAlignment="Left"
-                     Width="210"/>
+            <controls:SampleCustomControl NewTodoNameCustom="{Binding NewTodoName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AddButtonCommandCustom="{Binding AddButtonCommand}" DeleteButtonCommandCustom="{Binding DeleteButtonCommand}" HeaderTextbox="Neues Todo hinzufügen:" AddButtonContent="Add Todo" DeleteButtonContent="Delete Todo"/>
+            <!--<controls:SampleControl HeaderTextbox="Neues Todo hinzufügen:" AddButtonContent="Add Todo" DeleteButtonContent="Delete Todo"/>-->
         </StackPanel>
-        
-        <StackPanel Grid.Row="0">
-            <!-- Hinzufügen und Löschen Button -->
-            <Button x:Name="AddObjectButton" 
-                    Command="{Binding AddButtonCommand}"
-                    Style="{StaticResource ButtonStyle}">Add ToDo</Button>
-            <Button x:Name="DeleteButton" 
-                    Command="{Binding DeleteButtonCommand}"
-                    Style="{StaticResource ButtonStyle}">Delete ToDo</Button>
+                
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom">
+            <Button x:Name="ShowAllTodosButton"
+                    Content="Show all Todos"
+                    Command="{Binding ShowAllTodosCommand}"
+                    Style="{StaticResource MaterialDesignButtonStyle}">
+            </Button>
+            <Button x:Name="ShowFinishedTodosButton"
+                    Content="Show finished Todos"
+                    Command="{Binding ShowFinishedTodosCommand}"
+                    Style="{StaticResource MaterialDesignButtonStyle}">
+            </Button>
+            <Button x:Name="ShowNotFinishedTodosButton"
+                    Content="Show not finished Todos"
+                    Command="{Binding ShowNotFinishedTodosCommand}"
+                    Style="{StaticResource MaterialDesignButtonStyle}">
+            </Button>
         </StackPanel>
 
-        <StackPanel Grid.Row="1">
+        <StackPanel Grid.Row="2">
             <!-- alle ToDos der Liste anzeigen -->
-            <TextBlock Text="ToDo's:"
-                       Style="{StaticResource UeberschriftTextBlockStyle}"></TextBlock>
+            <TextBlock Text="Todo's:"
+                       Style="{StaticResource UeberschriftTextBlockStyle}"
+                       Margin="10,0,10,5"></TextBlock>
             <ListBox x:Name="listBox1"
                      SelectedItem="{Binding SelectedTodoItem, Mode=TwoWay}"
-                     ItemsSource="{Binding TodoItems}">
+                     ItemsSource="{Binding TodoItems}"
+                     Margin="10,0,10,0">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
                             <CheckBox x:Name="isDoneCheckBox" IsChecked="{Binding Path=IsDone}"></CheckBox>
-                            <TextBlock Width="200" Text="{Binding Path=Name}"></TextBlock>
+                            <TextBlock Width="200" 
+                                       x:Name="TodoName"
+                                       Text="{Binding Path=Name}"></TextBlock>
                             <TextBlock Text="{Binding Path=TimeStamp, 
                                 Converter={StaticResource ToDoDatumFormatConverter}}"></TextBlock>
                         </StackPanel>
+                        <DataTemplate.Triggers>
+                            <Trigger SourceName="isDoneCheckBox" Property="IsChecked" Value="True">
+                                <Setter TargetName="TodoName" Property="TextDecorations" Value="Strikethrough"/>
+                            </Trigger>
+                        </DataTemplate.Triggers>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
         </StackPanel>
 
-
-        <!-- <Button x:Name="AddObjectButton" 
-                Margin="419,38,230.6,322"
-                Content="click to add Object"
-                Click="OnAddObjectButtonClickedWithList"/>
-        -->
-       
-
-        <!--
-        <TextBox x:Name="ListeTextBox" Margin="62,160,401.6,49">
-            leere Liste
-        </TextBox>
-        -->       
+        <TextBlock Grid.Row="3"
+                   Text="{Binding TodaysNotFinishedTodosCounter, StringFormat=Anzahl nicht erledigter Todos welche heute erstellt worden sind: {0} }"
+                   FontSize="12"
+                   Margin="5,0,0,5">
+        </TextBlock>
     </Grid>
 </Window>

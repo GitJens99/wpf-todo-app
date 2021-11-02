@@ -14,20 +14,59 @@ using toDo.Services;
 
 namespace toDo.ViewModels
 {
-    public class MainWindowViewModel : ViewModelBase
+    static class EnumerableExtensions
     {
+        public static IEnumerable<ToDoItem> Where2(this IEnumerable<ToDoItem> todos, Func<ToDoItem, bool> filterMethod)
+        {
+            List<ToDoItem> result = new List<ToDoItem>();
+            foreach (var todo in todos)
+            {
+                if (filterMethod(todo))
+                {
+                    result.Add(todo);
+                }
+            }
+            return result;
+        }
+
+        public static IEnumerable<TodoItemViewModel> Select2(this IEnumerable<ToDoItem> todos,
+            Func<ToDoItem, TodoItemViewModel> selector)
+        {
+            List<TodoItemViewModel> result = new List<TodoItemViewModel>();
+            foreach(var todo in todos)
+            {
+                result.Add(selector(todo));
+            }
+            return result;
+        }
+    }
+    public class MainWindowViewModel : ViewModelBase
+    {        
         private const string NEW_TODO = "Neues Todo";
-        
+
         public ITodoItemService _todoItemService;
         public IDateTimeService _dateTimeService;
 
-        public ObservableCollection<TodoItemViewModel> TodoItems { get; set; }
+        private ObservableCollection<TodoItemViewModel> _todoItems;
+        public ObservableCollection<TodoItemViewModel> TodoItems 
+        {
+            get { return _todoItems; }
+            set 
+            {
+                _todoItems = value;
+                RaisePropertyChanged(nameof(TodoItems));
+            }
+        }
 
         private TodoItemViewModel _selectedTodoItem;
         public TodoItemViewModel SelectedTodoItem 
         {
             get { return _selectedTodoItem; }
-            set { _selectedTodoItem = value; DeleteButtonCommand?.RaiseCanExecuteChanged(); }
+            set 
+            { 
+                _selectedTodoItem = value; 
+                DeleteButtonCommand?.RaiseCanExecuteChanged(); 
+            }
         }
 
         private string _newTodoName;
@@ -42,8 +81,26 @@ namespace toDo.ViewModels
             }
         }
 
+        private int _todaysNotFinishedTodosCounter;
+        public int TodaysNotFinishedTodosCounter
+        {
+            get
+            {
+                return _todaysNotFinishedTodosCounter;
+            }
+            set
+            {
+                _todaysNotFinishedTodosCounter = value;
+                RaisePropertyChanged(nameof(TodaysNotFinishedTodosCounter));
+            }
+        }
+
         public RelayCommand AddButtonCommand { get; set; }
         public RelayCommand DeleteButtonCommand { get; set; }
+        public RelayCommand ShowAllTodosCommand { get; }
+        public RelayCommand ShowFinishedTodosCommand { get; }
+        public RelayCommand ShowNotFinishedTodosCommand { get; }
+
 
         public MainWindowViewModel(
             ITodoItemService todoItemService,
@@ -53,27 +110,90 @@ namespace toDo.ViewModels
             _dateTimeService = dateTimeService;
            
             TodoItems = new ObservableCollection<TodoItemViewModel>();
-            var todoItemModels = _todoItemService.ReadItemsFromJsonFile();
+            var SortedTodoItemModels = _todoItemService.ReadItemsFromJsonFile()
+                .OrderBy(todo => todo);
 
-            foreach(var item in todoItemModels)
+            foreach(var item in SortedTodoItemModels)
+            {
+                TodoItems.Add(CreateTodoViewModel(item));
+            } 
+             
+            AddButtonCommand = new RelayCommand(NewAddTodoItem, AddButtonCanUse);
+            DeleteButtonCommand = new RelayCommand(NewDeleteTodoItem, DeleteButtonCanUse);
+            ShowAllTodosCommand = new RelayCommand(ShowAllTodos, ShowAllTodosCanUse);
+            ShowFinishedTodosCommand = new RelayCommand(ShowFinishedTodos, ShowFinishedTodosCanUse);
+            ShowNotFinishedTodosCommand = new RelayCommand(ShowNotFinishedTodos, ShowNotFinishedTodosCanUse);
+
+            UpdateCounter();
+            NewTodoName = NEW_TODO;
+        }        
+
+        private bool ShowNotFinishedTodosCanUse()
+        {
+            return true;
+        }
+
+        private void ShowNotFinishedTodos()
+        {
+            var notFinishedTodos = _todoItemService.ReadItemsFromJsonFile()
+                .Where2(item => !item.IsDone)
+                .Select2(CreateTodoViewModel);
+            TodoItems = new ObservableCollection<TodoItemViewModel>(notFinishedTodos); 
+        }
+
+        private bool ShowFinishedTodosCanUse()
+        {
+            return true;
+        }
+
+        private void ShowFinishedTodos()
+        {
+            var allTodoItems = _todoItemService.ReadItemsFromJsonFile();
+            var finishedTodos = from item 
+                                in _todoItemService.ReadItemsFromJsonFile()
+                                where item.IsDone
+                                select CreateTodoViewModel(item);
+
+            TodoItems = new ObservableCollection<TodoItemViewModel>(finishedTodos);
+        }
+
+        private bool ShowAllTodosCanUse()
+        {
+            return true;
+        }
+
+        private void ShowAllTodos()
+        {
+            TodoItems = new ObservableCollection<TodoItemViewModel>();
+            var allTodoItems = _todoItemService.ReadItemsFromJsonFile();
+            foreach(var item in allTodoItems)
             {
                 TodoItems.Add(CreateTodoViewModel(item));
             }
-
-            AddButtonCommand = new RelayCommand(NewAddTodoItem, AddButtonCanUse);
-            DeleteButtonCommand = new RelayCommand(NewDeleteTodoItem, DeleteButtonCanUse);
-
-            NewTodoName = NEW_TODO;
         }
 
         private TodoItemViewModel CreateTodoViewModel(ToDoItem todoItem)
         {
-            return new TodoItemViewModel(todoItem, _todoItemService, TodoItems);
+            return new TodoItemViewModel(todoItem, _todoItemService, TodoItems, this);
+        }
+
+        public void UpdateCounter()
+        {
+            var filteredList = TodoItems
+                .Where(item => !item.IsDone)
+                .Where(TodoItemIsCreatedToday);
+
+            TodaysNotFinishedTodosCounter = filteredList.Count();
+        }
+
+        private bool TodoItemIsCreatedToday(TodoItemViewModel todo)
+        {
+            return todo.TimeStamp.Date == DateTime.Now.Date;
         }
 
         public bool AddButtonCanUse()
         {
-            return (!String.IsNullOrEmpty(NewTodoName)) &! String.Equals(NewTodoName, NEW_TODO);
+            return (!String.IsNullOrEmpty(NewTodoName)) & !String.Equals(NewTodoName, NEW_TODO);
         }
 
         public bool DeleteButtonCanUse()
@@ -83,7 +203,7 @@ namespace toDo.ViewModels
 
         private void NewAddTodoItem()
         {
-            if (!(String.IsNullOrWhiteSpace(NewTodoName)))
+            if (!(String.IsNullOrWhiteSpace(NewTodoName)) && NewTodoName != NEW_TODO)
             {
                 var newToDoItem = new ToDoItem()
                 {
@@ -92,8 +212,8 @@ namespace toDo.ViewModels
                 };
                 TodoItems.Add(CreateTodoViewModel(newToDoItem));
 
-                _todoItemService.SerializeAllItems(TodoItems.Select(vm => vm.TodoItem));
-
+                _todoItemService.SerializeAllItems(TodoItems.Select(viewModel => viewModel.TodoItem));
+                UpdateCounter();
                 NewTodoName = NEW_TODO;
             }
         }
@@ -104,13 +224,12 @@ namespace toDo.ViewModels
             {
                 TodoItems.Remove(SelectedTodoItem);
                 _todoItemService.SerializeAllItems(TodoItems.Select(vm => vm.TodoItem));
+                UpdateCounter();
             }
         }
 
         private void OnAddObjectButtonClickedWithList(object sender, RoutedEventArgs e)
         {
-            
-
             var newToDoItem = new ToDoItem()
             {
                 //Name = EingabeTextBox.Text,
@@ -127,7 +246,6 @@ namespace toDo.ViewModels
             if (SelectedTodoItem != null)
             {
                 TodoItems.Remove(SelectedTodoItem);
-                
             }
         }
 

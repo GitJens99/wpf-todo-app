@@ -23,8 +23,6 @@ namespace toDo.Commands
             _canExecute = canExecute;
         }
 
-
-
         public event EventHandler CanExecuteChanged;
 
         public bool CanExecute(object _)

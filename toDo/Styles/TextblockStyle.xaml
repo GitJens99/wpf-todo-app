@@ -1,0 +1,19 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Style x:Key="UeberschriftTextBlockStyle"
+               TargetType="TextBlock">
+        <Setter Property="Foreground" Value="Black" />
+        <Setter Property="FontSize" Value="22"/>
+    </Style>
+    <Style x:Key="UeberschriftTextBlockStyleBlue"
+               TargetType="TextBlock">
+        <Setter Property="Foreground" Value="Blue" />
+        <Setter Property="FontSize" Value="22"/>
+    </Style>
+    <Style x:Key="UeberschriftTextBlockStyleGreen"
+               TargetType="TextBlock">
+        <Setter Property="Foreground" Value="DarkGreen" />
+        <Setter Property="FontSize" Value="22"/>
+    </Style>
+</ResourceDictionary>
